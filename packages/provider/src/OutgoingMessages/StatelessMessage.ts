@@ -6,7 +6,7 @@ import { OutgoingMessage } from '../OutgoingMessage.ts'
 export class StatelessMessage extends OutgoingMessage {
   type = MessageType.Stateless
 
-  description = 'A stateless message'
+  description = '无状态消息'
 
   get(args: Partial<OutgoingMessageArguments>) {
     writeVarString(this.encoder, args.documentName!)

@@ -6,7 +6,7 @@ import { OutgoingMessage } from '../OutgoingMessage.ts'
 export class QueryAwarenessMessage extends OutgoingMessage {
   type = MessageType.QueryAwareness
 
-  description = 'Queries awareness states'
+  description = '查询感知状态'
 
   get(args: Partial<OutgoingMessageArguments>) {
 

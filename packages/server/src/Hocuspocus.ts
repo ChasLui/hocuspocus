@@ -134,38 +134,38 @@ export class Hocuspocus {
   }
 
   /**
-   * Get the total number of active documents
+   * 获取活动文档的总数
    */
   getDocumentsCount(): number {
     return this.documents.size
   }
 
   /**
-   * Get the total number of active connections
+   * 获取活动连接的总数
    */
   getConnectionsCount(): number {
     const uniqueSocketIds = new Set<string>()
     const totalDirectConnections = Array.from(this.documents.values()).reduce((acc, document) => {
-      // Accumulate unique socket IDs
+      // 累积唯一的 socket ID
       document.getConnections().forEach(({ socketId }) => {
         uniqueSocketIds.add(socketId)
       })
-      // Accumulate direct connections
+      // 累积直接连接
       return acc + document.directConnectionsCount
     }, 0)
-    // Return the sum of unique socket IDs and direct connections
+    // 返回唯一 socket ID 和直接连接的总和
     return uniqueSocketIds.size + totalDirectConnections
   }
 
   /**
-   * Force close one or more connections
+   * 强制关闭一个或多个连接
    */
   closeConnections(documentName?: string) {
-    // Iterate through all connections for all documents
-    // and invoke their close method, which is a graceful
-    // disconnect wrapper around the underlying websocket.close
+    // 遍历所有文档的所有连接
+    // 并调用它们的 close 方法，这是一个优雅的
+    // 在底层 websocket.close 周围的断开连接包装器
     this.documents.forEach((document: Document) => {
-      // If a documentName was specified, bail if it doesn't match
+      // 如果指定了 documentName，则如果它不匹配，则跳过
       if (documentName && document.name !== documentName) {
         return
       }
@@ -177,51 +177,48 @@ export class Hocuspocus {
   }
 
   /**
-   * The `handleConnection` method receives incoming WebSocket connections,
-   * runs all hooks:
+   * `handleConnection` 方法接收传入的 WebSocket 连接，
+   * 运行所有钩子：
    *
-   *  - onConnect for all connections
-   *  - onAuthenticate only if required
+   *  - 为所有连接运行 onConnect
+   *  - 仅在需要时运行 onAuthenticate
    *
-   * … and if nothing fails it’ll fully establish the connection and
-   * load the Document then.
+   * … 如果没有任何失败，它将完全建立连接并
+   * 加载文档。
    */
   handleConnection(incoming: WebSocket, request: IncomingMessage, defaultContext: any = {}): void {
     const clientConnection = new ClientConnection(incoming, request, this, this.hooks.bind(this), {
       timeout: this.configuration.timeout,
     }, defaultContext)
     clientConnection.onClose((document: Document, hookPayload: onDisconnectPayload) => {
-      // Check if there are still no connections to the document, as these hooks
-      // may take some time to resolve (e.g. database queries). If a
-      // new connection were to come in during that time it would rely on the
-      // document in the map that we remove now.
+      // 检查文档是否仍有连接，因为这些钩子
+      // 可能需要一些时间来解决（例如数据库查询）。如果在此期间有新的连接，
+      // 它将依赖于我们现在删除的文档。
       if (document.getConnectionsCount() > 0) {
         return
       }
 
-      // If it’s the last connection, we need to make sure to store the
-      // document. Use the debouncer executeNow helper, to run scheduled
-      // onStoreDocument immediately and clear running timers.
-      // If there is no scheduled run for this document there is no point in
-      // triggering onStoreDocument hook, as everything seems to be stored already.
-      // Only run this if the document has finished loading earlier (i.e. not to persist the empty
-      // ydoc if the onLoadDocument hook returned an error)
+      // 如果这是最后一个连接，我们需要确保存储文档。
+      // 使用 debouncer 立即执行 helper，以运行计划
+      // onStoreDocument 并清除运行计时器。
+      // 如果此文档没有计划运行，则没有必要触发 onStoreDocument 钩子，因为一切都似乎已经存储了。
+      // 仅在文档之前完成加载时运行此操作（即没有持久化空
+      // ydoc 如果 onLoadDocument 钩子返回错误）
       if (!document.isLoading && this.debouncer.isDebounced(`onStoreDocument-${document.name}`)) {
         if (this.configuration.unloadImmediately) {
           this.debouncer.executeNow(`onStoreDocument-${document.name}`)
         }
       } else {
-        // Remove document from memory immediately
+        // 立即从内存中删除文档
         this.unloadDocument(document)
       }
     })
   }
 
   /**
-   * Handle update of the given document
+   * 处理给定文档的更新
    *
-   * "connection" is not necessarily type "Connection", it's the Yjs "origin" (which is "Connection" if
-   * the update is incoming from the provider, but can be anything if the updates is originated from an extension.
+   * "connection" 不一定是类型 "Connection"，它是 Yjs 的 "origin"（如果更新来自提供者，则它是 "Connection"，但如果更新来自扩展，则可以是任何东西）。
    */
   private async handleDocumentUpdate(document: Document, connection: Connection | undefined, update: Uint8Array, request?: IncomingMessage) {
     const hookPayload: onChangePayload | onStoreDocumentPayload = {
@@ -239,10 +236,9 @@ export class Hocuspocus {
 
     this.hooks('onChange', hookPayload)
 
-    // If the update was received through other ways than the
-    // WebSocket connection, we don’t need to feel responsible for
-    // storing the content.
-    // also ignore changes incoming through redis connection, as this would be a breaking change (#730, #696, #606)
+    // 如果更新是通过除 WebSocket 连接之外的方式接收的，
+    // 我们不需要对此负责。
+    // 也忽略通过 redis 连接接收到的更新，因为这将是一个破坏性的变化 (#730, #696, #606)
     if (!connection || (connection as unknown as string) === '__hocuspocus__redis__origin__') {
       return
     }
@@ -251,7 +247,7 @@ export class Hocuspocus {
   }
 
   /**
-   * Create a new document by the given request
+   * 通过给定的请求创建一个新文档
    */
   public async createDocument(documentName: string, request: Partial<Pick<IncomingMessage, 'headers' | 'url'>>, socketId: string, connection: ConnectionConfiguration, context?: any): Promise<Document> {
     const existingLoadingDoc = this.loadingDocuments.get(documentName)
@@ -313,9 +309,9 @@ export class Hocuspocus {
 
     try {
       await this.hooks('onLoadDocument', hookPayload, (loadedDocument: Doc | undefined) => {
-        // if a hook returns a Y-Doc, encode the document state as update
-        // and apply it to the newly created document
-        // Note: instanceof doesn't work, because Doc !== Doc for some reason I don't understand
+        // 如果一个钩子返回一个 Y-Doc，将文档状态编码为更新
+        // 并将其应用到新创建的文档
+        // 注意：instanceof 不起作用，因为 Doc !== Doc 出于某种原因我不理解
         if (
           loadedDocument?.constructor.name === 'Document'
           || loadedDocument?.constructor.name === 'Doc'
@@ -365,7 +361,7 @@ export class Hocuspocus {
         return this.hooks('onStoreDocument', hookPayload)
           .then(() => {
             this.hooks('afterStoreDocument', hookPayload).then(async () => {
-              // Remove document from memory.
+              // 从内存中删除文档。
 
               if (document.getConnectionsCount() > 0) {
                 return
@@ -389,26 +385,26 @@ export class Hocuspocus {
   }
 
   /**
-   * Run the given hook on all configured extensions.
-   * Runs the given callback after each hook.
+   * 在所有配置的扩展上运行给定的钩子。
+   * 在每个钩子之后运行给定的回调。
    */
   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   hooks<T extends HookName>(name: T, payload: HookPayloadByName[T], callback: Function | null = null): Promise<any> {
     const { extensions } = this.configuration
 
-    // create a new `thenable` chain
+    // 创建一个新的 `thenable` 链
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/resolve
     let chain = Promise.resolve()
 
     extensions
-      // get me all extensions which have the given hook
+      // 获取所有具有给定钩子的扩展
       .filter(extension => typeof extension[name] === 'function')
-      // run through all the configured hooks
+      // 通过所有配置的钩子运行
       .forEach(extension => {
         chain = chain
           .then(() => (extension[name] as any)?.(payload))
           .catch(error => {
-            // make sure to log error messages
+            // 确保记录错误消息
             if (error?.message) {
               console.error(`[${name}]`, error.message)
             }
@@ -447,7 +443,7 @@ export class Hocuspocus {
 
     const document: Document = await this.createDocument(
       documentName,
-      {}, // direct connection has no request params
+      {}, // 直接连接没有请求参数
       uuid(),
       connectionConfig,
       context,

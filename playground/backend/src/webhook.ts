@@ -9,7 +9,7 @@ import { TiptapTransformer } from '@hocuspocus/transformer'
 import { Events, Webhook } from '@hocuspocus/extension-webhook'
 
 /*
- * Setup server
+ * 设置服务器
  */
 const server = new Server({
   port: 1234,
@@ -29,7 +29,7 @@ const server = new Server({
 server.listen()
 
 /*
- * Setup receiver
+ * 设置接收器
  */
 class WebhookReceiver {
 
@@ -43,7 +43,7 @@ class WebhookReceiver {
     this.server = createServer(this.handleRequest.bind(this))
 
     this.server.listen(12345, () => {
-      console.log('[WebhookReceiver] listening on port 12345…')
+      console.log('[WebhookReceiver] 正在监听端口 12345…')
     })
   }
 
@@ -71,24 +71,24 @@ class WebhookReceiver {
       const { event, payload } = <{ event: string, payload: any }> JSON.parse(data)
 
       try {
-        // @ts-ignore - let me do some magic here please TypeScript
+        // @ts-ignore - 让我在这里做些魔法吧，请 TypeScript
         this[`on${event[0].toUpperCase()}${event.substr(1)}`](payload, response)
       } catch (e) {
-        console.log(`[WebhookReceiver] unknown event "${event}"`)
+        console.log(`[WebhookReceiver] 未知事件 "${event}"`)
       }
     })
   }
 
   onConnect(payload: any, response: ServerResponse) {
-    console.log(`[WebhookReceiver] user connected to ${payload.documentName}`)
+    console.log(`[WebhookReceiver] 用户连接到 ${payload.documentName}`)
 
-    // authorize user
+    // 授权用户
     if (payload.requestParameters?.token !== this.apiToken) {
       response.writeHead(403, 'unathorized')
       return response.end()
     }
 
-    // return context
+    // 返回上下文
     response.writeHead(200, { 'Content-Type': 'application/json' })
     response.end(JSON.stringify({
       user: {
@@ -99,9 +99,9 @@ class WebhookReceiver {
   }
 
   onCreate(payload: any, response: ServerResponse) {
-    console.log(`[WebhookReceiver] document ${payload.documentName} created`)
+    console.log(`[WebhookReceiver] 文档 ${payload.documentName} 已创建`)
 
-    // return a document for the "default" field
+    // 返回一个文档用于 "default" 字段
     response.writeHead(200, { 'Content-Type': 'application/json' })
     response.end(JSON.stringify({
       default:
@@ -123,11 +123,11 @@ class WebhookReceiver {
   }
 
   onChange(payload: any, response: ServerResponse) {
-    console.log(`[WebhookReceiver] document ${payload.documentName} was changed: ${JSON.stringify(payload.document)}`)
+    console.log(`[WebhookReceiver] 文档 ${payload.documentName} 已更改: ${JSON.stringify(payload.document)}`)
   }
 
   onDisconnect(payload: any, response: ServerResponse) {
-    console.log(`[WebhookReceiver] user ${payload.context.user.name} disconnected from ${payload.documentName}`)
+    console.log(`[WebhookReceiver] 用户 ${payload.context.user.name} 从 ${payload.documentName} 断开连接`)
   }
 }
 

@@ -27,49 +27,49 @@ export type HocuspocusProviderWebsocketConfiguration = Required<
 
 export interface CompleteHocuspocusProviderWebsocketConfiguration {
 	/**
-	 * URL of your @hocuspocus/server instance
+	 * 你的 @hocuspocus/server 实例的 URL
 	 */
 	url: string;
 
 	/**
-	 * An optional WebSocket polyfill, for example for Node.js
+	 * 一个可选的 WebSocket 填充，例如用于 Node.js
 	 */
 	WebSocketPolyfill: any;
 
 	/**
-	 * Disconnect when no message is received for the defined amount of milliseconds.
+	 * 当在定义的毫秒数内没有收到消息时断开连接。
 	 */
 	messageReconnectTimeout: number;
 	/**
-	 * The delay between each attempt in milliseconds. You can provide a factor to have the delay grow exponentially.
+	 * 每次尝试之间的延迟（毫秒）。你可以提供一个因子来使延迟指数增长。
 	 */
 	delay: number;
 	/**
-	 * The initialDelay is the amount of time to wait before making the first attempt. This option should typically be 0 since you typically want the first attempt to happen immediately.
+	 * initialDelay 是等待第一次尝试之前的时间（毫秒）。这个选项通常应该是 0，因为你通常希望第一次尝试立即发生。
 	 */
 	initialDelay: number;
 	/**
-	 * The factor option is used to grow the delay exponentially.
+	 * factor 选项用于指数增长延迟。
 	 */
 	factor: number;
 	/**
-	 * The maximum number of attempts or 0 if there is no limit on number of attempts.
+	 * 最大尝试次数或 0（如果尝试次数没有限制）。
 	 */
 	maxAttempts: number;
 	/**
-	 * minDelay is used to set a lower bound of delay when jitter is enabled. This property has no effect if jitter is disabled.
+	 * minDelay 用于设置抖动启用时的延迟下限。如果抖动禁用，此属性没有效果。
 	 */
 	minDelay: number;
 	/**
-	 * The maxDelay option is used to set an upper bound for the delay when factor is enabled. A value of 0 can be provided if there should be no upper bound when calculating delay.
+	 * maxDelay 选项用于设置抖动启用时的延迟上限。如果抖动禁用，此属性没有效果。
 	 */
 	maxDelay: number;
 	/**
-	 * If jitter is true then the calculated delay will be a random integer value between minDelay and the calculated delay for the current iteration.
+	 * 如果抖动为 true，则计算的延迟将是一个介于 minDelay 和当前迭代计算的延迟之间的随机整数值。
 	 */
 	jitter: boolean;
 	/**
-	 * A timeout in milliseconds. If timeout is non-zero then a timer is set using setTimeout. If the timeout is triggered then future attempts will be aborted.
+	 * 一个超时时间（毫秒）。如果超时不为零，则使用 setTimeout 设置一个计时器。如果超时触发，则未来的尝试将被中止。
 	 */
 	timeout: number;
 	onOpen: (data: onOpenParameters) => void;
@@ -84,7 +84,7 @@ export interface CompleteHocuspocusProviderWebsocketConfiguration {
 	onAwarenessChange: (data: onAwarenessChangeParameters) => void;
 
 	/**
-	 * Map of attached providers keyed by documentName.
+	 * 按 documentName 键入的附加提供程序的映射。
 	 */
 	providerMap: Map<string, HocuspocusProvider>;
 }
@@ -97,23 +97,23 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		// @ts-ignore
 		document: undefined,
 		WebSocketPolyfill: undefined,
-		// TODO: this should depend on awareness.outdatedTime
+		// TODO：这应该取决于 awareness.outdatedTime
 		messageReconnectTimeout: 30000,
-		// 1 second
+		// 1 秒
 		delay: 1000,
-		// instant
+		// 瞬间
 		initialDelay: 0,
-		// double the delay each time
+		// 每次延迟加倍
 		factor: 2,
-		// unlimited retries
+		// 无限重试
 		maxAttempts: 0,
-		// wait at least 1 second
+		// 至少等待 1 秒
 		minDelay: 1000,
-		// at least every 30 seconds
+		// 至少每 30 秒
 		maxDelay: 30000,
-		// randomize
+		// 随机化
 		jitter: true,
-		// retry forever
+		// 无限重试
 		timeout: 0,
 		onOpen: () => null,
 		onConnect: () => null,
@@ -228,7 +228,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 			return;
 		}
 
-		// Always cancel any previously initiated connection retryer instances
+		// 总是取消任何先前启动的连接重试器实例
 		if (this.cancelWebsocketRetry) {
 			this.cancelWebsocketRetry();
 			this.cancelWebsocketRetry = undefined;
@@ -255,7 +255,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 					}
 				},
 			}).catch((error: any) => {
-				// If we aborted the connection attempt then don’t throw an error
+				// 如果我们中止了连接尝试，则不要抛出错误
 				// ref: https://github.com/lifeomic/attempt/blob/master/src/index.ts#L136
 				if (error && error.code !== "ATTEMPT_ABORTED") {
 					throw error;
@@ -334,11 +334,11 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
 			this.webSocket = ws;
 
-			// Reset the status
+			// 重置状态
 			this.status = WebSocketStatus.Connecting;
 			this.emit("status", { status: WebSocketStatus.Connecting });
 
-			// Store resolve/reject for later use
+			// 存储 resolve/reject 以供将来使用
 			this.connectionAttempt = {
 				resolve,
 				reject,
@@ -382,17 +382,17 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 	closeTries = 0;
 
 	checkConnection() {
-		// Don’t check the connection when it’s not even established
+		// 不要在连接未建立时检查连接
 		if (this.status !== WebSocketStatus.Connected) {
 			return;
 		}
 
-		// Don’t close the connection while waiting for the first message
+		// 不要在等待第一个消息时关闭连接
 		if (!this.lastMessageReceived) {
 			return;
 		}
 
-		// Don’t close the connection when a message was received recently
+		// 不要在收到消息后立即关闭连接
 		if (
 			this.configuration.messageReconnectTimeout >=
 			time.getUnixTime() - this.lastMessageReceived
@@ -400,9 +400,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 			return;
 		}
 
-		// No message received in a long time, not even your own
-		// Awareness updates, which are updated every 15 seconds
-		// if awareness is enabled.
+		// 长时间没有收到消息，甚至你的 own
+		// 意识更新，如果启用了意识。
 		this.closeTries += 1;
 		// https://bugs.webkit.org/show_bug.cgi?id=247943
 		if (this.closeTries > 2) {
@@ -419,7 +418,7 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 		}
 	}
 
-	// Ensure that the URL never ends with /
+	// 确保 URL 永远不会以 / 结尾
 	get serverUrl() {
 		while (this.configuration.url[this.configuration.url.length - 1] === "/") {
 			return this.configuration.url.slice(0, this.configuration.url.length - 1);
@@ -464,12 +463,12 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 			this.rejectConnectionAttempt();
 		}
 
-		// Let’s update the connection status.
+		// 让我们更新连接状态。
 		this.status = WebSocketStatus.Disconnected;
 		this.emit("status", { status: WebSocketStatus.Disconnected });
 		this.emit("disconnect", { event });
 
-		// trigger connect if no retry is running and we want to have a connection
+		// 如果没有任何重试在运行并且我们想要一个连接，则触发连接
 		if (!this.cancelWebsocketRetry && this.shouldConnect) {
 			setTimeout(() => {
 				this.connect();
@@ -482,9 +481,8 @@ export class HocuspocusProviderWebsocket extends EventEmitter {
 
 		clearInterval(this.intervals.connectionChecker);
 
-		// If there is still a connection attempt outstanding then we should stop
-		// it before calling disconnect, otherwise it will be rejected in the onClose
-		// handler and trigger a retry
+		// 如果仍有连接尝试未完成，则应在调用 disconnect 之前停止
+		// 否则它将在 onClose 处理程序中被拒绝并触发重试
 		this.stopConnectionAttempt();
 
 		this.disconnect();

@@ -11,7 +11,7 @@ export class DirectConnection implements DirectConnectionInterface {
   context: any
 
   /**
-   * Constructor.
+   * 构造函数。
    */
   constructor(
     document: Document,
@@ -59,9 +59,9 @@ export class DirectConnection implements DirectConnectionInterface {
         socketId: 'server',
       }, true)
 
-      // If the direct connection was the only connection to the document
-      // then we should trigger the onDisconnect hook for
-      // this doc and unload the document
+      // 如果直接连接是文档的唯一连接，
+      // 那么我们应该为此文档触发 onDisconnect 钩子
+      // 并卸载文档
       if (this.document.getConnectionsCount() === 0) {
         await this.instance.hooks('onDisconnect', {
           instance: this.instance,

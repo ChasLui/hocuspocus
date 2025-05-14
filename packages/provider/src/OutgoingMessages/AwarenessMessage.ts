@@ -7,15 +7,15 @@ import { OutgoingMessage } from '../OutgoingMessage.ts'
 export class AwarenessMessage extends OutgoingMessage {
   type = MessageType.Awareness
 
-  description = 'Awareness states update'
+  description = '意识状态更新'
 
   get(args: Partial<OutgoingMessageArguments>) {
     if (typeof args.awareness === 'undefined') {
-      throw new Error('The awareness message requires awareness as an argument')
+      throw new Error('意识消息需要 awareness 作为参数')
     }
 
     if (typeof args.clients === 'undefined') {
-      throw new Error('The awareness message requires clients as an argument')
+      throw new Error('意识消息需要 clients 作为参数')
     }
 
     encoding.writeVarString(this.encoder, args.documentName!)

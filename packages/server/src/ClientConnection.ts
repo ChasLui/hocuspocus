@@ -25,23 +25,22 @@ import {
 import { getParameters } from './util/getParameters.ts'
 
 /**
- * The `ClientConnection` class is responsible for handling an incoming WebSocket
+ * `ClientConnection` 类负责处理传入的 WebSocket 连接。
  *
  * TODO-refactor:
- * - use event handlers instead of calling hooks directly, hooks should probably be called from Hocuspocus.ts
+ * - 使用事件处理程序而不是直接调用钩子，钩子应该从 Hocuspocus.ts 调用
  */
 export class ClientConnection {
-  // this map indicates whether a `Connection` instance has already taken over for incoming message for the key (i.e. documentName)
+  // 此映射指示是否已为传入消息（即 documentName）设置了一个 `Connection` 实例
   private readonly documentConnections: Record<string, Connection> = {}
 
-  // While the connection will be establishing messages will
-  // be queued and handled later.
+  // 在连接建立时，消息将被排队并稍后处理。
   private readonly incomingMessageQueue: Record<string, Uint8Array[]> = {}
 
-  // While the connection is establishing, kee
+  // 在连接建立时，消息将被排队并稍后处理。
   private readonly documentConnectionsEstablished = new Set<string>()
 
-  // hooks payload by Document
+  // 文档的钩子负载
   private readonly hookPayloads: Record<string, {
     instance: Hocuspocus,
     request: IncomingMessage,
@@ -56,7 +55,7 @@ export class ClientConnection {
     onClose: [(document: Document, payload: onDisconnectPayload) => {}],
   }
 
-  // Every new connection gets a unique identifier.
+  // 每个新连接都会获得一个唯一的标识符。
   private readonly socketId = uuid()
 
   timeout: number
@@ -66,14 +65,14 @@ export class ClientConnection {
   pongReceived = true
 
   /**
-    * The `ClientConnection` class receives incoming WebSocket connections,
-    * runs all hooks:
+    * `ClientConnection` 类接收传入的 WebSocket 连接，
+    * 运行所有钩子：
     *
-    *  - onConnect for all connections
-    *  - onAuthenticate only if required
+    *  - onConnect 所有连接
+    *  - onAuthenticate 仅在需要时
     *
-    * … and if nothings fails it’ll fully establish the connection and
-    * load the Document then.
+    * … 如果没有任何失败，它将完全建立连接并
+    * 加载文档。
     */
   constructor(
     private readonly websocket: WebSocket,
@@ -112,7 +111,7 @@ export class ClientConnection {
   }
 
   /**
-   * Check if pong was received and close the connection otherwise
+   * 检查是否收到 pong 并关闭连接否则
    * @private
    */
   private check = () => {
@@ -131,7 +130,7 @@ export class ClientConnection {
   }
 
   /**
-   * Set a callback that will be triggered when the connection is closed
+   * 设置一个回调，当连接关闭时将被触发
    */
   public onClose(callback: (document: Document, payload: onDisconnectPayload) => void): ClientConnection {
     this.callbacks.onClose.push(callback)
@@ -140,7 +139,7 @@ export class ClientConnection {
   }
 
   /**
-   * Create a new connection by the given request and document
+   * 通过给定的请求和文档创建一个新连接
    */
   private createConnection(connection: WebSocket, document: Document): Connection {
     const hookPayload = this.hookPayloads[document.name]
@@ -155,7 +154,7 @@ export class ClientConnection {
 
     instance.onClose(async (document, event) => {
       const disconnectHookPayload: onDisconnectPayload = {
-        instance: this.documentProvider as Hocuspocus, // TODO, this will be removed when we use events instead of hooks for this class
+        instance: this.documentProvider as Hocuspocus, // TODO, 当我们将事件而不是钩子用于此类时，这将删除
         clientsCount: document.getConnectionsCount(),
         context: hookPayload.context,
         document,
@@ -174,10 +173,8 @@ export class ClientConnection {
         return await this.hooks('onStateless', payload)
       } catch (error: any) {
         if (error?.message) {
-        // if a hook rejects and the error is empty, do nothing
-        // this is only meant to prevent later hooks and the
-        // default handler to do something. if an error is present
-        // just rethrow it
+        // 如果一个钩子拒绝了，并且错误为空，什么都不做
+        // 这只是为了防止后来的钩子和默认的处理程序做一些事情。如果存在错误，则重新抛出它
           throw error
         }
       }
@@ -185,7 +182,7 @@ export class ClientConnection {
 
     instance.beforeHandleMessage((connection, update) => {
       const beforeHandleMessagePayload: beforeHandleMessagePayload = {
-        instance: this.documentProvider as Hocuspocus, // TODO, this will be removed when we use events instead of hooks for this class
+        instance: this.documentProvider as Hocuspocus, // TODO, 当我们将事件而不是钩子用于此类时，这将删除
         clientsCount: document.getConnectionsCount(),
         context: hookPayload.context,
         document,
@@ -217,10 +214,10 @@ export class ClientConnection {
     return instance
   }
 
-  // Once all hooks are run, we’ll fully establish the connection:
+  // 一旦所有钩子都运行，我们将完全建立连接：
   private setUpNewConnection = async (documentName: string) => {
     const hookPayload = this.hookPayloads[documentName]
-    // If no hook interrupts, create a document and connection
+    // 如果没有任何钩子中断，创建一个文档和连接
     const document = await this.documentProvider.createDocument(documentName, hookPayload.request, hookPayload.socketId, hookPayload.connectionConfig, hookPayload.context)
     const connection = this.createConnection(this.websocket, document)
 
@@ -233,8 +230,8 @@ export class ClientConnection {
 
     this.documentConnections[documentName] = connection
 
-    // If the WebSocket has already disconnected (wow, that was fast) – then
-    // immediately call close to cleanup the connection and document in memory.
+    // 如果 WebSocket 已经断开连接（哇，这太快了） – 那么
+    // 立即调用 close 来清理连接和内存中的文档。
     if (
       this.websocket.readyState === WsReadyStates.Closing
       || this.websocket.readyState === WsReadyStates.Closed
@@ -243,8 +240,8 @@ export class ClientConnection {
       return
     }
 
-    // There’s no need to queue messages anymore.
-    // Let’s work through queued messages.
+    // 不再需要排队消息。
+    // 让我们处理队列中的消息。
     this.incomingMessageQueue[documentName].forEach(input => {
       this.websocket.emit('message', input)
     })
@@ -257,7 +254,7 @@ export class ClientConnection {
     })
   }
 
-  // This listener handles authentication messages and queues everything else.
+  // 此监听器处理身份验证消息并排队其他消息。
   private handleQueueingMessage = async (data: Uint8Array) => {
     try {
       const tmpMsg = new SocketIncomingMessage(data)
@@ -270,11 +267,11 @@ export class ClientConnection {
         return
       }
 
-      // Okay, we’ve got the authentication message we’re waiting for:
+      // 好的，我们得到了我们正在等待的身份验证消息：
       this.documentConnectionsEstablished.add(documentName)
 
-      // The 2nd integer contains the submessage type
-      // which will always be authentication when sent from client -> server
+      // 第二个整数包含子消息类型
+      // 当从客户端到服务器发送时，它总是身份验证
       decoding.readVarUint(tmpMsg.decoder)
       const token = decoding.readVarString(tmpMsg.decoder)
 
@@ -282,7 +279,7 @@ export class ClientConnection {
         const hookPayload = this.hookPayloads[documentName]
 
         await this.hooks('onConnect', { ...hookPayload, documentName }, (contextAdditions: any) => {
-          // merge context from all hooks
+          // 从所有钩子合并上下文
           hookPayload.context = { ...hookPayload.context, ...contextAdditions }
         })
 
@@ -291,19 +288,19 @@ export class ClientConnection {
           ...hookPayload,
           documentName,
         }, (contextAdditions: any) => {
-          // Hooks are allowed to give us even more context and we’ll merge everything together.
-          // We’ll pass the context to other hooks then.
+          // 钩子可以给我们更多的上下文，我们将合并所有内容。
+          // 然后我们将上下文传递给其他钩子。
           hookPayload.context = { ...hookPayload.context, ...contextAdditions }
         })
-        // All `onAuthenticate` hooks passed.
+        // 所有 `onAuthenticate` 钩子都通过了。
         hookPayload.connectionConfig.isAuthenticated = true
 
-        // Let the client know that authentication was successful.
+        // 让客户端知道身份验证成功。
         const message = new OutgoingMessage(documentName).writeAuthenticated(hookPayload.connectionConfig.readOnly)
 
         this.websocket.send(message.toUint8Array())
 
-        // Time to actually establish the connection.
+        // 是时候实际建立连接了。
         await this.setUpNewConnection(documentName)
       } catch (err: any) {
         const error = err || Forbidden
@@ -312,7 +309,7 @@ export class ClientConnection {
         this.websocket.send(message.toUint8Array())
       }
 
-      // Catch errors due to failed decoding of data
+      // 捕获由于数据解码失败而导致的错误
     } catch (error) {
       console.error(error)
       this.websocket.close(ResetConnection.code, ResetConnection.reason)
@@ -327,10 +324,10 @@ export class ClientConnection {
 
       const connection = this.documentConnections[documentName]
       if (connection) {
-        // forward the message to the connection
+        // 将消息转发给连接
         connection.handleMessage(data)
 
-        // we already have a `Connection` set up for this document
+        // 我们已经在文档上设置了一个 `Connection`
         return
       }
 
@@ -361,7 +358,7 @@ export class ClientConnection {
 
       this.handleQueueingMessage(data)
     } catch (closeError) {
-      // catch is needed in case an invalid payload crashes the parsing of the Uint8Array
+      // 在处理无效负载时需要捕获
       console.error(closeError)
       this.websocket.close(Unauthorized.code, Unauthorized.reason)
     }

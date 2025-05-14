@@ -19,14 +19,14 @@ import type { MessageType } from './types.ts'
 
 export class IncomingMessage {
   /**
-   * Access to the received message.
+   * 访问接收到的消息。
    */
   decoder: Decoder
 
   /**
-   * Private encoder; can be undefined.
+   * 私有编码器；可以为空。
    *
-   * Lazy creation of the encoder speeds up IncomingMessages that need only a decoder.
+   * 延迟创建编码器可以加快仅需要解码器的消息。
    */
   private encoderInternal?: Encoder
 

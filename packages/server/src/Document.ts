@@ -20,7 +20,7 @@ export class Document extends Doc {
     connection: Connection
   }> = new Map()
 
-  // The number of direct (non-websocket) connections to this document
+  // 此文档的直接（非 WebSocket）连接数
   directConnectionsCount = 0
 
   name: string
@@ -30,7 +30,7 @@ export class Document extends Doc {
   isDestroyed = false
 
   /**
-   * Constructor.
+   * 构造函数。
    */
   constructor(name: string, yDocOptions?: object) {
     super(yDocOptions)
@@ -47,7 +47,7 @@ export class Document extends Doc {
   }
 
   /**
-   * Check if the Document (XMLFragment or Map) is empty
+   * 检查文档（XMLFragment 或 Map）是否为空
    */
   isEmpty(fieldName: string): boolean {
     // eslint-disable-next-line no-underscore-dangle
@@ -55,7 +55,7 @@ export class Document extends Doc {
   }
 
   /**
-   * Merge the given document(s) into this one
+   * 将给定的文档（或文档数组）合并到此文档中
    */
   merge(documents: Doc|Array<Doc>): Document {
     (Array.isArray(documents) ? documents : [documents]).forEach(document => {
@@ -66,7 +66,7 @@ export class Document extends Doc {
   }
 
   /**
-   * Set a callback that will be triggered when the document is updated
+   * 设置一个回调，当文档更新时将被触发
    */
   onUpdate(callback: (document: Document, connection: Connection, update: Uint8Array) => void): Document {
     this.callbacks.onUpdate = callback
@@ -75,7 +75,7 @@ export class Document extends Doc {
   }
 
   /**
-   * Set a callback that will be triggered before a stateless message is broadcasted
+   * 设置一个回调，当无状态消息被广播时将被触发
    */
   beforeBroadcastStateless(callback: (document: Document, stateless: string) => void): Document {
     this.callbacks.beforeBroadcastStateless = callback
@@ -84,8 +84,7 @@ export class Document extends Doc {
   }
 
   /**
-   * Register a connection and a set of clients on this document keyed by the
-   * underlying websocket connection
+   * 在底层 WebSocket 连接上注册一个连接和一组客户端
    */
   addConnection(connection: Connection): Document {
     this.connections.set(connection.webSocket, {
@@ -97,14 +96,14 @@ export class Document extends Doc {
   }
 
   /**
-   * Is the given connection registered on this document
+   * 给定的连接是否已注册在此文档上
    */
   hasConnection(connection: Connection): boolean {
     return this.connections.has(connection.webSocket)
   }
 
   /**
-   * Remove the given connection from this document
+   * 从此文档中删除给定的连接
    */
   removeConnection(connection: Connection): Document {
     removeAwarenessStates(
@@ -133,21 +132,21 @@ export class Document extends Doc {
   }
 
   /**
-   * Get the number of active connections for this document
+   * 获取此文档的活动连接数
    */
   getConnectionsCount(): number {
     return this.connections.size + this.directConnectionsCount
   }
 
   /**
-   * Get an array of registered connections
+   * 获取此文档的注册连接数组
    */
   getConnections(): Array<Connection> {
     return Array.from(this.connections.values()).map(data => data.connection)
   }
 
   /**
-   * Get the client ids for the given connection instance
+   * 获取给定连接实例的客户端 ID 数组
    */
   getClients(connectionInstance: WebSocket): Set<any> {
     const connection = this.connections.get(connectionInstance)
@@ -156,14 +155,14 @@ export class Document extends Doc {
   }
 
   /**
-   * Has the document awareness states
+   * 文档是否具有意识状态
    */
   hasAwarenessStates(): boolean {
     return this.awareness.getStates().size > 0
   }
 
   /**
-   * Apply the given awareness update
+   * 应用给定的意识更新
    */
   applyAwarenessUpdate(connection: Connection, update: Uint8Array): Document {
     applyAwarenessUpdate(
@@ -176,7 +175,7 @@ export class Document extends Doc {
   }
 
   /**
-   * Handle an awareness update and sync changes to clients
+   * 处理意识更新并同步更改到客户端
    * @private
    */
   private handleAwarenessUpdate(
@@ -207,7 +206,7 @@ export class Document extends Doc {
   }
 
   /**
-   * Handle an updated document and sync changes to clients
+   * 处理文档更新并同步更改到客户端
    */
   private handleUpdate(update: Uint8Array, connection: Connection): Document {
     this.callbacks.onUpdate(this, connection, update)
@@ -226,7 +225,7 @@ export class Document extends Doc {
   }
 
   /**
-   * Broadcast stateless message to all connections
+   * 向所有连接广播无状态消息
    */
   public broadcastStateless(payload: string, filter?: (conn: Connection) => boolean): void {
     this.callbacks.beforeBroadcastStateless(this, payload)

@@ -13,7 +13,7 @@ export enum MessageType {
   Awareness = 1,
   Auth = 2,
   QueryAwareness = 3,
-  SyncReply = 4, // same as Sync, but won't trigger another 'SyncStep1'
+  SyncReply = 4, // 与 Sync 相同，但不会触发另一个 'SyncStep1'
   Stateless = 5,
   BroadcastStateless = 6,
   CLOSE = 7,
@@ -109,45 +109,44 @@ export type HookPayloadByName = {
 
 export interface Configuration extends Extension {
   /**
-   * A name for the instance, used for logging.
+   * 实例的名称，用于日志记录。
    */
   name: string | null,
   /**
-   * A list of hocuspocus extensions.
+   * 一个 hocuspocus 扩展列表。
    */
   extensions: Array<Extension>,
   /**
-   * Defines in which interval the server sends a ping, and closes the connection when no pong is sent back.
+   * 定义服务器在哪个时间间隔发送一个 ping，并在没有 pong 返回时关闭连接。
    */
   timeout: number,
   /**
-   * Debounces the call of the `onStoreDocument` hook for the given amount of time in ms.
-   * Otherwise every single update would be persisted.
+   * 对 `onStoreDocument` 钩子进行防抖处理，给定的时间间隔为 ms。
+   * 否则每次更新都会被持久化。
    */
   debounce: number,
   /**
-   * Makes sure to call `onStoreDocument` at least in the given amount of time (ms).
+   * 确保至少在给定的时间间隔内调用 `onStoreDocument` (ms)。
    */
   maxDebounce: number
   /**
-   * By default, the servers show a start screen. If passed false, the server will start quietly.
+   * 默认情况下，服务器会显示一个启动屏幕。如果传递 false，服务器将静默启动。
    */
   quiet: boolean,
   /**
-   * If set to false, respects the debounce time of `onStoreDocument` before unloading a document.
-   * Otherwise, the document will be unloaded immediately.
+   * 如果设置为 false，在卸载文档之前会尊重 `onStoreDocument` 的防抖时间。
+   * 否则，文档将立即卸载。
    *
-   * This prevents a client from DOSing the server by repeatedly connecting and disconnecting when
-   * your onStoreDocument is rate-limited.
+   * 这可以防止客户端通过反复连接和断开连接来对服务器进行 DOS 攻击，当你的 `onStoreDocument` 被速率限制时。
    */
   unloadImmediately: boolean,
 
   /**
-   * options to pass to the ydoc document
+   * 传递给 ydoc 文档的选项。
    */
   yDocOptions: {
-    gc: boolean, // enable or disable garbage collection (see https://github.com/yjs/yjs/blob/main/INTERNALS.md#deletions)
-    gcFilter: () => boolean, // will be called before garbage collecting ; return false to keep it
+    gc: boolean, // 启用或禁用垃圾回收（请参阅 https://github.com/yjs/yjs/blob/main/INTERNALS.md#deletions）
+    gcFilter: () => boolean, // 在垃圾回收之前会被调用；返回 false 以保留它
   },
 
 }
@@ -260,7 +259,7 @@ export interface beforeSyncPayload {
   documentName: string,
   connection: Connection,
   /**
-   * The y-protocols/sync message type
+   * y-protocols/sync 消息类型
    * @example
    * 0: SyncStep1
    * 1: SyncStep2
@@ -270,7 +269,7 @@ export interface beforeSyncPayload {
    */
   type: number,
   /**
-   * The payload of the y-sync message.
+   * y-sync 消息的 payload。
    */
   payload: Uint8Array,
 }

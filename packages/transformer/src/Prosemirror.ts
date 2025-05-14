@@ -22,12 +22,12 @@ class Prosemirror implements Transformer {
   fromYdoc(document: Doc, fieldName?: string | Array<string>): any {
     const data = {}
 
-    // allow a single field name
+    // 允许单个字段名
     if (typeof fieldName === 'string') {
       return yDocToProsemirrorJSON(document, fieldName)
     }
 
-    // default to all available fields if the given field name is empty
+    // 如果给定的字段名是空，则默认使用所有可用的字段
     if (fieldName === undefined || fieldName.length === 0) {
       fieldName = Array.from(document.share.keys())
     }
@@ -45,7 +45,7 @@ class Prosemirror implements Transformer {
       throw new Error(`You’ve passed an empty or invalid document to the Transformer. Make sure to pass ProseMirror-compatible JSON. Actually passed JSON: ${document}`)
     }
 
-    // allow a single field name
+    // 允许单个字段名
     if (typeof fieldName === 'string') {
       return prosemirrorJSONToYDoc(schema || this.defaultSchema, document, fieldName)
     }

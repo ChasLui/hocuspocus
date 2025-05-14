@@ -6,7 +6,7 @@ import { OutgoingMessage } from '../OutgoingMessage.ts'
 export class CloseMessage extends OutgoingMessage {
   type = MessageType.CLOSE
 
-  description = 'Ask the server to close the connection'
+  description = '请求服务器关闭连接'
 
   get(args: Partial<OutgoingMessageArguments>) {
     encoding.writeVarString(this.encoder, args.documentName!)

@@ -22,15 +22,14 @@ const SQLITE_INMEMORY = ':memory:'
 
 export interface SQLiteConfiguration extends DatabaseConfiguration {
   /**
-   * Valid values are filenames, ":memory:" for an anonymous in-memory database and an empty
-   * string for an anonymous disk-based database. Anonymous databases are not persisted and
-   * when closing the database handle, their contents are lost.
+   * 有效值为文件名、":memory:" 用于匿名内存数据库和空字符串用于匿名磁盘数据库。匿名数据库不会持久化，
+   * 当关闭数据库句柄时，它们的内容会丢失。
    *
    * https://github.com/mapbox/node-sqlite3/wiki/API#new-sqlite3databasefilename-mode-callback
    */
   database: string,
   /**
-   * The database schema to create.
+   * 要创建的数据库模式。
    */
   schema: string,
 }
@@ -78,7 +77,7 @@ export class SQLite extends Database {
 
   async onListen() {
     if (this.configuration.database === SQLITE_INMEMORY) {
-      console.warn(`  ${kleur.yellow('The SQLite extension is configured as an in-memory database. All changes will be lost on restart!')}`)
+      console.warn(`  ${kleur.yellow('SQLite 扩展配置为内存数据库。所有更改将在重启时丢失!')}`)
       console.log()
     }
   }

@@ -9,7 +9,7 @@ const { app } = expressWebsockets(express())
 app.use(cors())
 
 app.get('/', (request, response) => {
-  // do NOT do this in production, this is just for demo purposes. The secret MUST be stored on the server and never reach the client side.
+  // 不要在生产中这样做，这只是为了演示目的。秘密必须存储在服务器上，并且永远不要到达客户端。
   const { secret } = request.query
 
   const jwt = jsonwebtoken.sign({

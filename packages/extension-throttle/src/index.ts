@@ -4,10 +4,10 @@ import type {
 } from '@hocuspocus/server'
 
 export interface ThrottleConfiguration {
-  throttle: number | null | false, // how many requests within `consideredSeconds` until we're rejecting requests (setting this to 15 means the 16th request will be rejected)
-  consideredSeconds: number, // how many seconds to consider (default is last 60 seconds from the current connection attempt)
-  banTime: number, // for how long to ban after receiving too many requests (in minutes!)
-  cleanupInterval: number // how often to clean up the records of IPs (this won't delete ips that are still blocked or recent enough by `consideredSeconds`)
+  throttle: number | null | false, // 在拒绝请求之前，在 `consideredSeconds` 内有多少请求 (设置为 15 意味着第 16 个请求将被拒绝)
+  consideredSeconds: number, // 考虑多少秒 (默认是当前连接尝试的最后 60 秒)
+  banTime: number, // 在收到太多请求后禁止多长时间 (以分钟为单位!)
+  cleanupInterval: number // 清理 IP 记录的频率 (这不会删除仍然被阻止或足够新的 IP 通过 `consideredSeconds`)
 }
 
 export class Throttle implements Extension {
@@ -26,7 +26,7 @@ export class Throttle implements Extension {
   cleanupInterval?: NodeJS.Timeout
 
   /**
-   * Constructor
+   * 构造函数
    */
   constructor(configuration?: Partial<ThrottleConfiguration>) {
     this.configuration = {
@@ -70,7 +70,7 @@ export class Throttle implements Extension {
   }
 
   /**
-   * Throttle requests
+   * 限制请求
    * @private
    */
   private throttle(ip: string): boolean {
@@ -82,11 +82,11 @@ export class Throttle implements Extension {
 
     this.bannedIps.delete(ip)
 
-    // add this connection try to the list of previous connections
+    // 将此连接尝试添加到先前连接的列表中
     const previousConnections = this.connectionsByIp.get(ip) || []
     previousConnections.push(Date.now())
 
-    // calculate the previous connections in the last considered time interval
+    // 计算在最后考虑的时间间隔内之前的连接
     const previousConnectionsInTheConsideredInterval = previousConnections
       .filter(timestamp => timestamp + (this.configuration.consideredSeconds * 1000) > Date.now())
 
@@ -101,19 +101,19 @@ export class Throttle implements Extension {
   }
 
   /**
-   * onConnect hook
+   * onConnect 钩子
    * @param data
    */
   onConnect(data: onConnectPayload): Promise<any> {
     const { request } = data
 
-    // get the remote ip address
+    // 获取远程 IP 地址
     const ip = request.headers['x-real-ip']
       || request.headers['x-forwarded-for']
       || request.socket.remoteAddress
       || ''
 
-    // throttle the connection
+    // 限制连接
     return this.throttle(<string> ip) ? Promise.reject() : Promise.resolve()
   }
 

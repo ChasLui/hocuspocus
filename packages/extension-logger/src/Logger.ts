@@ -12,49 +12,49 @@ import type {
 
 export interface LoggerConfiguration {
   /**
-   * Prepend all logging message with a string.
+   * 在所有日志消息前面添加一个字符串。
    *
    * @deprecated
    */
   prefix: null | string,
   /**
-   * Whether to log something for the `onLoadDocument` hook.
+   * 是否为 `onLoadDocument` 钩子记录日志。
    */
   onLoadDocument: boolean,
   /**
-   * Whether to log something for the `onChange` hook.
+   * 是否为 `onChange` 钩子记录日志。
    */
   onChange: boolean,
   /**
-   * Whether to log something for the `onStoreDocument` hook.
+   * 是否为 `onStoreDocument` 钩子记录日志。
    */
    onStoreDocument: boolean,
   /**
-   * Whether to log something for the `onConnect` hook.
+   * 是否为 `onConnect` 钩子记录日志。
    */
   onConnect: boolean,
   /**
-   * Whether to log something for the `onDisconnect` hook.
+   * 是否为 `onDisconnect` 钩子记录日志。
    */
   onDisconnect: boolean,
   /**
-   * Whether to log something for the `onUpgrade` hook.
+   * 是否为 `onUpgrade` 钩子记录日志。
    */
   onUpgrade: boolean,
   /**
-   * Whether to log something for the `onRequest` hook.
+   * 是否为 `onRequest` 钩子记录日志。
    */
   onRequest: boolean,
   /**
-   * Whether to log something for the `onDestroy` hook.
+   * 是否为 `onDestroy` 钩子记录日志。
    */
   onDestroy: boolean,
   /**
-   * Whether to log something for the `onConfigure` hook.
+   * 是否为 `onConfigure` 钩子记录日志。
    */
   onConfigure: boolean,
   /**
-   * A log function, if none is provided output will go to console
+   * 一个日志函数，如果未提供，输出将转到控制台。
    */
   log: (...args: any[]) => void,
 }
@@ -77,7 +77,7 @@ export class Logger implements Extension {
   }
 
   /**
-   * Constructor
+   * 构造函数
    */
   constructor(configuration?: Partial<LoggerConfiguration>) {
     this.configuration = {
@@ -94,7 +94,7 @@ export class Logger implements Extension {
     }
 
     if (this.configuration.prefix) {
-      console.warn('[hocuspocus warn] The Logger \'prefix\' is deprecated. Pass a \'name\' to the Hocuspocus configuration instead.')
+      console.warn('[Hocuspocus 警告]Logger \'prefix\' 已弃用。将 \'name\' 传递给 Hocuspocus 配置。')
     }
   }
 

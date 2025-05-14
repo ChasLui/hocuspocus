@@ -41,36 +41,36 @@ export type HocuspocusProviderConfiguration =
 
 export interface CompleteHocuspocusProviderConfiguration {
   /**
-  * The identifier/name of your document
-  */
+   * 你的文档的标识/名称
+   */
    name: string,
   /**
-   * The actual Y.js document
+   * 实际的 Y.js 文档
    */
   document: Y.Doc,
 
   /**
-   * An Awareness instance to keep the presence state of all clients.
+   * 一个 Awareness 实例来保持所有客户端的存在状态。
    *
-   * You can disable sharing awareness information by passing `null`.
-   * Note that having no awareness information shared across all connections will break our ping checks
-   * and thus trigger reconnects. You should always have at least one Provider with enabled awareness per
-   * socket connection, or ensure that the Provider receives messages before running into `HocuspocusProviderWebsocket.messageReconnectTimeout`.
+   * 你可以通过传递 `null` 来禁用共享意识信息。
+   * 请注意，没有共享意识信息将打破我们的 ping 检查
+   * 并因此触发重新连接。你应该始终有一个启用了意识信息的 Provider
+   * 每个 socket 连接一个，或者确保 Provider 在运行 `HocuspocusProviderWebsocket.messageReconnectTimeout` 之前收到消息。
    */
   awareness: Awareness | null,
 
   /**
-   * A token that’s sent to the backend for authentication purposes.
+   * 一个令牌，用于后端的身份验证。
    */
   token: string | (() => string) | (() => Promise<string>) | null,
 
   /**
-   * Hocuspocus websocket provider
+   * Hocuspocus websocket 提供程序
    */
   websocketProvider: HocuspocusProviderWebsocket,
 
   /**
-   * Force syncing the document in the defined interval.
+   * 在定义的间隔内强制同步文档。
    */
   forceSyncInterval: false | number,
 
@@ -296,10 +296,10 @@ export class HocuspocusProvider extends EventEmitter {
   }
 
   /**
-   * Indicates whether a first handshake with the server has been established
+   * 指示是否已与服务器建立第一次握手
    *
-   * Note: this does not mean all updates from the client have been persisted to the backend. For this,
-   * use `hasUnsyncedChanges`.
+   * 注意：这并不意味着所有来自客户端的更新都已持久化到后端。为此，
+   * 使用 `hasUnsyncedChanges`。
    */
   get synced(): boolean {
     return this.isSynced
@@ -321,13 +321,13 @@ export class HocuspocusProvider extends EventEmitter {
     this.emit('stateless', { payload })
   }
 
-  // not needed, but provides backward compatibility with e.g. lexical/yjs
+  // 不需要，但提供了与 e.g. lexical/yjs 的向后兼容性
   async connect() {
     if( this.manageSocket ) {
       return this.configuration.websocketProvider.connect()
     }
 
-    console.warn('HocuspocusProvider::connect() is deprecated and does not do anything. Please connect/disconnect on the websocketProvider, or attach/deattach providers.')
+    console.warn('HocuspocusProvider::connect() 已弃用且不执行任何操作。请在 websocketProvider 上连接/断开连接，或附加/分离提供程序。')
   }
 
   disconnect() {
@@ -335,7 +335,7 @@ export class HocuspocusProvider extends EventEmitter {
       return this.configuration.websocketProvider.disconnect()
     }
 
-    console.warn('HocuspocusProvider::disconnect() is deprecated and does not do anything. Please connect/disconnect on the websocketProvider, or attach/deattach providers.')
+    console.warn('HocuspocusProvider::disconnect() 已弃用且不执行任何操作。请在 websocketProvider 上连接/断开连接，或附加/分离提供程序。')
   }
 
   async onOpen(event: Event) {
@@ -407,7 +407,7 @@ export class HocuspocusProvider extends EventEmitter {
     this.isAuthenticated = false
     this.synced = false
 
-    // update awareness (all users except local left)
+    // 更新意识（所有本地用户除外）
     if (this.awareness) {
       removeAwarenessStates(
         this.awareness,
@@ -501,7 +501,7 @@ export class HocuspocusProvider extends EventEmitter {
 
   setAwarenessField(key: string, value: any) {
     if (!this.awareness) {
-      throw new AwarenessError(`Cannot set awareness field "${key}" to ${JSON.stringify(value)}. You have disabled Awareness for this provider by explicitly passing awareness: null in the provider configuration.`)
+      throw new AwarenessError(`无法设置意识字段 "${key}" 为 ${JSON.stringify(value)}。你通过在提供程序配置中显式传递 awareness: null 来禁用意识。`)
     }
     this.awareness.setLocalStateField(key, value)
   }

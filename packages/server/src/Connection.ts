@@ -32,7 +32,7 @@ export class Connection {
   readOnly: boolean
 
   /**
-   * Constructor.
+   * 构造函数。
    */
   constructor(
     connection: WebSocket,
@@ -56,7 +56,7 @@ export class Connection {
   }
 
   /**
-   * Set a callback that will be triggered when the connection is closed
+   * 设置一个回调，当连接关闭时将被触发
    */
   onClose(callback: (document: Document, event?: CloseEvent) => void): Connection {
     this.callbacks.onClose.push(callback)
@@ -65,7 +65,7 @@ export class Connection {
   }
 
   /**
-   * Set a callback that will be triggered when an stateless message is received
+   * 设置一个回调，当收到无状态消息时将被触发
    */
   onStatelessCallback(callback: (payload: onStatelessPayload) => Promise<void>): Connection {
     this.callbacks.statelessCallback = callback
@@ -74,7 +74,7 @@ export class Connection {
   }
 
   /**
-   * Set a callback that will be triggered before an message is handled
+   * 设置一个回调，当收到消息时将被触发
    */
   beforeHandleMessage(callback: (connection: Connection, update: Uint8Array) => Promise<any>): Connection {
     this.callbacks.beforeHandleMessage = callback
@@ -83,7 +83,7 @@ export class Connection {
   }
 
   /**
-   * Set a callback that will be triggered before a sync message is handled
+   * 设置一个回调，当收到同步消息时将被触发
    */
   beforeSync(callback: (connection: Connection, payload: Pick<beforeSyncPayload, 'type' | 'payload'>) => Promise<any>): Connection {
     this.callbacks.beforeSync = callback
@@ -92,7 +92,7 @@ export class Connection {
   }
 
   /**
-   * Send the given message
+   * 发送给定的消息
    */
   send(message: any): void {
     if (
@@ -113,7 +113,7 @@ export class Connection {
   }
 
   /**
-   * Send a stateless message with payload
+   * 发送一个带有有效负载的无状态消息
    */
   public sendStateless(payload: string): void {
     const message = new OutgoingMessage(this.document.name)
@@ -125,7 +125,7 @@ export class Connection {
   }
 
   /**
-   * Graceful wrapper around the WebSocket close method.
+   * 优雅地包装 WebSocket 关闭方法。
    */
   close(event?: CloseEvent): void {
       if (this.document.hasConnection(this)) {
@@ -139,7 +139,7 @@ export class Connection {
   }
 
   /**
-   * Send the current document awareness to the client, if any
+   * 向客户端发送当前文档意识，如果有的话
    * @private
    */
   private sendCurrentAwareness(): void {
@@ -154,7 +154,7 @@ export class Connection {
   }
 
   /**
-   * Handle an incoming message
+   * 处理传入的消息
    * @public
    */
   public handleMessage(data: Uint8Array): void {

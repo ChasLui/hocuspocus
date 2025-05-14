@@ -25,56 +25,56 @@ export type RedisInstance = RedisClient.Cluster | RedisClient.Redis;
 
 export interface Configuration {
 	/**
-	 * Redis port
+	 * Redis 端口
 	 */
 	port: number;
 	/**
-	 * Redis host
+	 * Redis 主机
 	 */
 	host: string;
 	/**
-	 * Redis Cluster
+	 * Redis 集群
 	 */
 	nodes?: ClusterNode[];
 	/**
-	 * Duplicate from an existed Redis instance
+	 * 从现有的 Redis 实例复制
 	 */
 	redis?: RedisInstance;
 	/**
-	 * Redis instance creator
+	 * Redis 实例创建者
 	 */
 	createClient?: () => RedisInstance;
 	/**
-	 * Options passed directly to Redis constructor
+	 * 直接传递给 Redis 构造函数的选项
 	 *
 	 * https://github.com/luin/ioredis/blob/master/API.md#new-redisport-host-options
 	 */
 	options?: ClusterOptions | RedisOptions;
 	/**
-	 * An unique instance name, required to filter messages in Redis.
-	 * If none is provided an unique id is generated.
+	 * 一个唯一的实例名称，用于在 Redis 中过滤消息。
+	 * 如果未提供，则生成一个唯一的 ID。
 	 */
 	identifier: string;
 	/**
-	 * Namespace for Redis keys, if none is provided 'hocuspocus' is used
+	 * Redis 键的命名空间，如果未提供，则使用 'hocuspocus'
 	 */
 	prefix: string;
 	/**
-	 * The maximum time for the Redis lock in ms (in case it can’t be released).
+	 * Redis 锁的最大时间（在无法释放的情况下）
 	 */
 	lockTimeout: number;
 	/**
-	 * A delay before onDisconnect is executed. This allows last minute updates'
-	 * sync messages to be received by the subscription before it's closed.
+	 * 在 onDisconnect 执行之前延迟的时间。
+	 * 这允许在订阅关闭之前接收最后时刻的更新同步消息。
 	 */
 	disconnectDelay: number;
 }
 
 export class Redis implements Extension {
 	/**
-	 * Make sure to give that extension a higher priority, so
-	 * the `onStoreDocument` hook is able to intercept the chain,
-	 * before documents are stored to the database.
+	 * 确保给该扩展一个更高的优先级，以便
+	 * `onStoreDocument` 钩子能够拦截链，
+	 * 在文档存储到数据库之前。
 	 */
 	priority = 1000;
 
@@ -102,8 +102,7 @@ export class Redis implements Extension {
 	messagePrefix: Buffer;
 
 	/**
-	 * When we have a high frequency of updates to a document we don't need tons of setTimeouts
-	 * piling up, so we'll track them to keep it to the most recent per document.
+	 * 当我们对文档进行高频率的更新时，我们不需要堆积大量的 setTimeouts，因此我们会跟踪它们以保持每个文档的更新。
 	 */
 	private pendingDisconnects = new Map<string, NodeJS.Timeout>();
 
@@ -118,7 +117,7 @@ export class Redis implements Extension {
 			...configuration,
 		};
 
-		// Create Redis instance
+		// 创建 Redis 实例
 		const { port, host, options, nodes, redis, createClient } =
 			this.configuration;
 
@@ -183,15 +182,14 @@ export class Redis implements Extension {
 	}
 
 	/**
-	 * Once a document is loaded, subscribe to the channel in Redis.
+	 * 一旦文档加载，在 Redis 中订阅通道。
 	 */
 	public async afterLoadDocument({
 		documentName,
 		document,
 	}: afterLoadDocumentPayload) {
 		return new Promise((resolve, reject) => {
-			// On document creation the node will connect to pub and sub channels
-			// for the document.
+			// 在文档创建时，节点将连接到文档的 pub 和 sub 通道。
 			this.sub.subscribe(this.subKey(documentName), async (error: any) => {
 				if (error) {
 					reject(error);
@@ -207,7 +205,7 @@ export class Redis implements Extension {
 	}
 
 	/**
-	 * Publish the first sync step through Redis.
+	 * 通过 Redis 发布第一步同步。
 	 */
 	private async publishFirstSyncStep(documentName: string, document: Document) {
 		const syncMessage = new OutgoingMessage(documentName)
@@ -221,7 +219,7 @@ export class Redis implements Extension {
 	}
 
 	/**
-	 * Let’s ask Redis who is connected already.
+	 * 让 Redis 询问谁已经连接。
 	 */
 	private async requestAwarenessFromOtherInstances(documentName: string) {
 		const awarenessMessage = new OutgoingMessage(
@@ -235,12 +233,12 @@ export class Redis implements Extension {
 	}
 
 	/**
-	 * Before the document is stored, make sure to set a lock in Redis.
-	 * That’s meant to avoid conflicts with other instances trying to store the document.
+	 * 在文档存储之前，确保在 Redis 中设置一个锁。
+	 * 这是为了避免与其他实例尝试存储文档时发生冲突。
 	 */
 	async onStoreDocument({ documentName }: onStoreDocumentPayload) {
-		// Attempt to acquire a lock and read lastReceivedTimestamp from Redis,
-		// to avoid conflict with other instances storing the same document.
+		// 尝试获取一个锁并从 Redis 读取 lastReceivedTimestamp，
+		// 避免与其他实例存储相同文档时发生冲突。
 
 		return new Promise((resolve, reject) => {
 			this.redlock.lock(
@@ -248,8 +246,8 @@ export class Redis implements Extension {
 				this.configuration.lockTimeout,
 				async (error, lock) => {
 					if (error || !lock) {
-						// Expected behavior: Could not acquire lock, another instance locked it already.
-						// No further `onStoreDocument` hooks will be executed.
+						// 预期行为：无法获取锁，另一个实例已经锁定它。
+						// 不会执行进一步的 `onStoreDocument` 钩子。
 						console.log("unable to acquire lock");
 						reject();
 						return;
@@ -264,7 +262,7 @@ export class Redis implements Extension {
 	}
 
 	/**
-	 * Release the Redis lock, so other instances can store documents.
+	 * 释放 Redis 锁，以便其他实例可以存储文档。
 	 */
 	async afterStoreDocument({
 		documentName,
@@ -274,15 +272,15 @@ export class Redis implements Extension {
 			.get(this.lockKey(documentName))
 			?.unlock()
 			.catch(() => {
-				// Not able to unlock Redis. The lock will expire after ${lockTimeout} ms.
-				// console.error(`Not able to unlock Redis. The lock will expire after ${this.configuration.lockTimeout}ms.`)
+				// 无法解锁 Redis。锁将在 ${lockTimeout} ms 后过期。
+				// console.error(`无法解锁 Redis。锁将在 ${this.configuration.lockTimeout}ms.`)
 			})
 			.finally(() => {
 				this.locks.delete(this.lockKey(documentName));
 			});
 
-		// if the change was initiated by a directConnection, we need to delay this hook to make sure sync can finish first.
-		// for provider connections, this usually happens in the onDisconnect hook
+		// 如果更改是由 directConnection 发起的，我们需要延迟此钩子，以确保同步可以首先完成。
+		// 对于 provider 连接，这通常在 onDisconnect 钩子中发生
 		if (socketId === "server") {
 			const pending = this.pendingAfterStoreDocumentResolves.get(documentName);
 
@@ -312,7 +310,7 @@ export class Redis implements Extension {
 	}
 
 	/**
-	 * Handle awareness update messages received directly by this Hocuspocus instance.
+	 * 处理由该 Hocuspocus 实例直接接收的意识更新消息。
 	 */
 	async onAwarenessUpdate({
 		documentName,
@@ -333,9 +331,8 @@ export class Redis implements Extension {
 	}
 
 	/**
-	 * Handle incoming messages published on subscribed document channels.
-	 * Note that this will also include messages from ourselves as it is not possible
-	 * in Redis to filter these.
+	 * 处理在订阅的文档通道上发布的传入消息。
+	 * 请注意，这也会包括来自我们自己的消息，因为不可能在 Redis 中过滤这些消息。
 	 */
 	private handleIncomingMessage = async (channel: Buffer, data: Buffer) => {
 		const [identifier, messageBuffer] = this.decodeMessage(data);
@@ -367,7 +364,7 @@ export class Redis implements Extension {
 	};
 
 	/**
-	 * if the ydoc changed, we'll need to inform other Hocuspocus servers about it.
+	 * 如果 ydoc 更改，我们需要通知其他 Hocuspocus 服务器。
 	 */
 	public async onChange(data: onChangePayload): Promise<any> {
 		if (data.transactionOrigin !== this.redisTransactionOrigin) {
@@ -376,8 +373,7 @@ export class Redis implements Extension {
 	}
 
 	/**
-	 * Make sure to *not* listen for further changes, when there’s
-	 * no one connected anymore.
+	 * 确保在没有人连接时不再监听进一步的更改。
 	 */
 	public onDisconnect = async ({ documentName }: onDisconnectPayload) => {
 		const pending = this.pendingDisconnects.get(documentName);
@@ -392,12 +388,12 @@ export class Redis implements Extension {
 
 			this.pendingDisconnects.delete(documentName);
 
-			// Do nothing, when other users are still connected to the document.
+			// 当其他用户仍连接到文档时，什么都不做。
 			if (!document || document.getConnectionsCount() > 0) {
 				return;
 			}
 
-			// Time to end the subscription on the document channel.
+			// 是时候结束文档通道上的订阅了。
 			this.sub.unsubscribe(this.subKey(documentName), (error: any) => {
 				if (error) {
 					console.error(error);
@@ -406,7 +402,7 @@ export class Redis implements Extension {
 
 			this.instance.unloadDocument(document);
 		};
-		// Delay the disconnect procedure to allow last minute syncs to happen
+		// 延迟断开连接过程，以允许最后时刻的同步发生
 		const timeout = setTimeout(disconnect, this.configuration.disconnectDelay);
 		this.pendingDisconnects.set(documentName, timeout);
 	};
@@ -423,7 +419,7 @@ export class Redis implements Extension {
 	}
 
 	/**
-	 * Kill the Redlock connection immediately.
+	 * 立即杀死 Redlock 连接。
 	 */
 	async onDestroy() {
 		await this.redlock.quit();

@@ -7,7 +7,7 @@ import { OutgoingMessage } from '../OutgoingMessage.ts'
 export class UpdateMessage extends OutgoingMessage {
   type = MessageType.Sync
 
-  description = 'A document update'
+  description = '文档更新'
 
   get(args: Partial<OutgoingMessageArguments>) {
     writeVarString(this.encoder, args.documentName!)

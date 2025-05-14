@@ -47,7 +47,7 @@ export class Webhook implements Extension {
   debounced: Map<string, { timeout: NodeJS.Timeout, start: number }> = new Map()
 
   /**
-   * Constructor
+   * 构造函数
    */
   constructor(configuration?: Partial<Configuration>) {
     this.configuration = {
@@ -61,7 +61,7 @@ export class Webhook implements Extension {
   }
 
   /**
-   * Create a signature for the response body
+   * 创建响应体的签名
    */
   createSignature(body: string): string {
     const hmac = createHmac('sha256', this.configuration.secret)
@@ -70,7 +70,7 @@ export class Webhook implements Extension {
   }
 
   /**
-   * debounce the given function, using the given identifier
+   * 使用给定的标识符对给定的函数进行防抖
    */
   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   debounce(id: string, func: Function) {
@@ -92,7 +92,7 @@ export class Webhook implements Extension {
   }
 
   /**
-   * Send a request to the given url containing the given data
+   * 向包含给定数据的给定 URL 发送请求
    */
   async sendRequest(event: Events, payload: any) {
     const json = JSON.stringify({ event, payload })
@@ -105,7 +105,7 @@ export class Webhook implements Extension {
   }
 
   /**
-   * onChange hook
+   * onChange 钩子
    */
   async onChange(data: onChangePayload) {
     if (!this.configuration.events.includes(Events.onChange)) {
@@ -122,7 +122,7 @@ export class Webhook implements Extension {
           requestParameters: Object.fromEntries(data.requestParameters.entries()),
         })
       } catch (e) {
-        console.error(`Caught error in extension-webhook: ${e}`)
+        console.error(`在 extension-webhook 中捕获到错误： ${e}`)
       }
     }
 
@@ -134,7 +134,7 @@ export class Webhook implements Extension {
   }
 
   /**
-   * onLoadDocument hook
+   * onLoadDocument 钩子
    */
   async onLoadDocument(data: onLoadDocumentPayload) {
     if (!this.configuration.events.includes(Events.onCreate)) {
@@ -168,7 +168,7 @@ export class Webhook implements Extension {
   }
 
   /**
-   * onConnect hook
+   * onConnect 钩子
    */
   async onConnect(data: onConnectPayload) {
     if (!this.configuration.events.includes(Events.onConnect)) {

@@ -4,9 +4,8 @@ export interface CloseEvent {
 }
 
 /**
- * The server is terminating the connection because a data frame was received
- * that is too large.
- * See: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/code
+ * 服务器正在终止连接，因为收到的数据帧太大。
+ * 详见: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/code
  */
 export const MessageTooBig: CloseEvent = {
   code: 1009,
@@ -14,8 +13,7 @@ export const MessageTooBig: CloseEvent = {
 }
 
 /**
- * The server successfully processed the request, asks that the requester reset
- * its document view, and is not returning any content.
+ * 服务器成功处理了请求，要求请求者重置其文档视图，并且未返回任何内容。
  */
 export const ResetConnection: CloseEvent = {
   code: 4205,
@@ -23,8 +21,7 @@ export const ResetConnection: CloseEvent = {
 }
 
 /**
- * Similar to Forbidden, but specifically for use when authentication is required and has
- * failed or has not yet been provided.
+ * 与 Forbidden 类似，但专门用于需要身份验证且身份验证失败或尚未提供时使用。
  */
 export const Unauthorized: CloseEvent = {
   code: 4401,
@@ -32,8 +29,7 @@ export const Unauthorized: CloseEvent = {
 }
 
 /**
- * The request contained valid data and was understood by the server, but the server
- * is refusing action.
+ * 请求包含有效数据，并且服务器能够理解，但服务器拒绝执行作。
  */
 export const Forbidden: CloseEvent = {
   code: 4403,
@@ -41,7 +37,7 @@ export const Forbidden: CloseEvent = {
 }
 
 /**
- * The server timed out waiting for the request.
+ * 服务器等待请求超时。
  */
 export const ConnectionTimeout: CloseEvent = {
   code: 4408,

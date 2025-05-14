@@ -7,11 +7,11 @@ import { OutgoingMessage } from '../OutgoingMessage.ts'
 export class SyncStepOneMessage extends OutgoingMessage {
   type = MessageType.Sync
 
-  description = 'First sync step'
+  description = '第一步同步'
 
   get(args: Partial<OutgoingMessageArguments>) {
     if (typeof args.document === 'undefined') {
-      throw new Error('The sync step one message requires document as an argument')
+      throw new Error('同步第一步消息需要 document 作为参数')
     }
 
     encoding.writeVarString(this.encoder, args.documentName!)

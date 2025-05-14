@@ -9,19 +9,19 @@ import * as Y from 'yjs'
 
 export interface DatabaseConfiguration {
   /**
-   * Pass a Promise to retrieve updates from your database. The Promise should resolve to
-   * an array of items with Y.js-compatible binary data.
+   * 传递一个 Promise 从你的数据库中检索更新。Promise 应该解析为
+   * 一个包含 Y.js 兼容二进制数据的数组。
    */
   fetch: (data: fetchPayload) => Promise<Uint8Array | null>,
   /**
-   * Pass a function to store updates in your database.
+   * 传递一个函数来存储更新到你的数据库。
    */
   store: (data: storePayload) => Promise<void>,
 }
 
 export class Database implements Extension {
   /**
-   * Default configuration
+   * 默认配置
    */
   configuration: DatabaseConfiguration = {
     fetch: async () => null,
@@ -29,7 +29,7 @@ export class Database implements Extension {
   }
 
   /**
-   * Constructor
+   * 构造函数
    */
   constructor(configuration: Partial<DatabaseConfiguration>) {
     this.configuration = {
@@ -39,7 +39,7 @@ export class Database implements Extension {
   }
 
   /**
-   * Get stored data from the database.
+   * 从数据库中获取存储的数据。
    */
   async onLoadDocument(data: onLoadDocumentPayload): Promise<any> {
     const update = await this.configuration.fetch(data)
@@ -50,7 +50,7 @@ export class Database implements Extension {
   }
 
   /**
-   * Store new updates in the database.
+   * 在数据库中存储新的更新。
    */
   async onStoreDocument(data: onChangePayload) {
     await this.configuration.store({

@@ -42,7 +42,7 @@ export class MessageReceiver {
           if (reply) {
             reply(message.toUint8Array())
           } else if (connection) {
-            // TODO: We should log this, shouldn’t we?
+            // TODO: 我们应该记录这个，不是吗？
             // this.logger.log({
             //   direction: 'out',
             //   type: MessageType.Awareness,
@@ -133,19 +133,19 @@ export class MessageReceiver {
       }
       case messageYjsSyncStep2:
         if (connection?.readOnly) {
-          // We're in read-only mode, so we can't apply the update.
-          // Let's use snapshotContainsUpdate to see if the update actually contains changes.
-          // If not, we can still ack the update
+          // 我们在只读模式下，所以不能应用更新。
+          // 让我们使用 snapshotContainsUpdate 来看看更新是否实际上包含更改。
+          // 如果没有，我们仍然可以确认更新
           const snapshot = Y.snapshot(document)
           const update = decoding.readVarUint8Array(message.decoder)
           if (Y.snapshotContainsUpdate(snapshot, update)) {
-            // no new changes in update
+            // 更新中没有新的更改
             const ackMessage = new OutgoingMessage(document.name)
               .writeSyncStatus(true)
 
             connection.send(ackMessage.toUint8Array())
           } else {
-            // new changes in update that we can't apply, because readOnly
+            // 更新中包含我们无法应用的新更改，因为 readOnly
             const ackMessage = new OutgoingMessage(document.name)
               .writeSyncStatus(false)
 

@@ -66,7 +66,7 @@ export class MessageReceiver {
     }
 
     // Reply
-    if (message.length() > emptyMessageLength + 1) { // length of documentName (considered in emptyMessageLength plus length of yjs sync type, set in applySyncMessage)
+    if (message.length() > emptyMessageLength + 1) { // documentName 的长度（考虑 emptyMessageLength 加上 yjs 同步类型的长度，在 applySyncMessage 中设置）
       // @ts-ignore
       provider.send(OutgoingMessage, { encoder: message.encoder })
     }

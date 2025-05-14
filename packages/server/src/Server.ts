@@ -59,9 +59,8 @@ export class Server {
 
       incoming.on('error', error => {
         /**
-         * Handle a ws instance error, which is required to prevent
-         * the server from crashing when one happens
-         * See https://github.com/websockets/ws/issues/1777#issuecomment-660803472
+         * 处理 ws 实例错误，这是防止服务器在发生崩溃时崩溃所必需的
+         * 详见： https://github.com/websockets/ws/issues/1777#issuecomment-660803472
          * @private
          */
         console.error('Error emitted from webSocket instance:')
@@ -82,16 +81,13 @@ export class Server {
           instance: this.hocuspocus,
         })
 
-        // let the default websocket server handle the connection if
-        // prior hooks don't interfere
+        // 如果 prior hooks 不干扰，让默认的 websocket 服务器处理连接
         this.webSocketServer.handleUpgrade(request, socket, head, ws => {
           this.webSocketServer.emit('connection', ws, request)
         })
       } catch (error) {
-        // if a hook rejects and the error is empty, do nothing
-        // this is only meant to prevent later hooks and the
-        // default handler to do something. if a error is present
-        // just rethrow it
+        // 如果一个钩子拒绝了，并且错误为空，什么都不做
+        // 这只是为了防止后来的钩子和默认的处理程序做一些事情。如果存在错误，则重新抛出它
         if (error) {
           throw error
         }
@@ -103,14 +99,12 @@ export class Server {
     try {
       await this.hocuspocus.hooks('onRequest', { request, response, instance: this.hocuspocus })
 
-      // default response if all prior hooks don't interfere
+      // 如果 prior hooks 不干扰，默认响应
       response.writeHead(200, { 'Content-Type': 'text/plain' })
       response.end('Welcome to Hocuspocus!')
     } catch (error) {
-      // if a hook rejects and the error is empty, do nothing
-      // this is only meant to prevent later hooks and the
-      // default handler to do something. if a error is present
-      // just rethrow it
+      // 如果一个钩子拒绝了，并且错误为空，什么都不做
+      // 这只是为了防止后来的钩子和默认的处理程序做一些事情。如果存在错误，则重新抛出它
       if (error) {
         throw error
       }

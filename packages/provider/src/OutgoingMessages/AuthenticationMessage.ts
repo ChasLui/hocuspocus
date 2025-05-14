@@ -11,7 +11,7 @@ export class AuthenticationMessage extends OutgoingMessage {
 
   get(args: Partial<OutgoingMessageArguments>) {
     if (typeof args.token === 'undefined') {
-      throw new Error('The authentication message requires `token` as an argument.')
+      throw new Error('身份验证消息需要 `token` 作为参数。')
     }
 
     writeVarString(this.encoder, args.documentName!)

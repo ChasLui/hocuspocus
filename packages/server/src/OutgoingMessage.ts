@@ -123,7 +123,7 @@ export class OutgoingMessage {
     return this
   }
 
-  // TODO: should this be write* or create* as method name?
+  // TODO: 应该将这个方法名改为 write* 还是 create*？
   writeSyncStatus(updateSaved: boolean): OutgoingMessage {
     this.category = 'SyncStatus'
 
