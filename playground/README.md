@@ -1,6 +1,5 @@
 # Hocuspocus Playground
 
-```
 Hi!
 
 Welcome to the playground. This is mainly meant for internal usage during Hocuspocus development,
@@ -16,7 +15,7 @@ If you want changes inside the packages folder to compile live, you can use roll
 (see also docs/contributing.md)
 
 You can run `npm run playground` in the repository root, which will spin up a development server on
-http://127.0.0.1:3000.
+`http://127.0.0.1:3000`.
 
 ## S3 Extension Development
 
@@ -35,7 +34,8 @@ npm run playground:s3-redis # S3 + Redis scaling examples
 ```
 
 The development environment includes:
-- MinIO (S3-compatible): http://localhost:9000 (API) / http://localhost:9001 (Console)
+
+- MinIO (S3-compatible): [API](http://localhost:9000) / [Console](http://localhost:9001)
 - Redis: localhost:6379
 - Default credentials: minioadmin / minioadmin
 
@@ -47,8 +47,8 @@ The development environment includes:
 - `npm run playground:redis` - Redis extension example
 - `npm run playground:s3` - S3 extension examples
 - `npm run playground:s3-redis` - S3 + Redis scaling
+- `npm run playground:kafka` - Kafka extension examples (Kafka+SQLite on 8000/8001, Kafka+S3 on 8002/8003)
 - `npm run playground:webhook` - Webhook extension example
 
 If you have any questions, feel free to join our discord or ask on Github (links can be found in the
 repo README.md one folder up).
-```

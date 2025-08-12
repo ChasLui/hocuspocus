@@ -13,12 +13,11 @@ test("initially doesn't have unsynced changes", async t => {
     t.is(provider.hasUnsyncedChanges, false)
     t.is(provider.synced, false)
 
-    setTimeout(() => {
-      t.is(provider.hasUnsyncedChanges, false)
-      t.is(provider.synced, true)
-
-      resolve()
-    }, 200)
+    await retryableAssertion(t, tt => {
+      tt.is(provider.hasUnsyncedChanges, false)
+      tt.is(provider.synced, true)
+    })
+    resolve()
   })
 })
 
@@ -181,7 +180,8 @@ test('has no unsynced changes when in readonly mode and initial document has not
 
   const provider = newHocuspocusProvider(server, { document, token: 'readonly' })
 
-  await sleep(200)
-
-  t.is(provider.hasUnsyncedChanges, false)
+  // Wait until the initial sync ACK is processed to avoid flakiness
+  await retryableAssertion(t, tt => {
+    tt.is(provider.hasUnsyncedChanges, false)
+  })
 })

@@ -1,38 +1,41 @@
 import test from 'ava'
-import { Redis } from '@hocuspocus/extension-redis'
+import { Kafka } from '@hocuspocus/extension-kafka'
 import { v4 as uuidv4 } from 'uuid'
-import { newHocuspocus, newHocuspocusProvider, redisConnectionSettings } from '../utils/index.ts'
+import { newHocuspocus, newHocuspocusProvider } from '../utils/index.ts'
+import { ensureKafkaMock, resetKafkaMock } from '../utils/mockKafka.ts'
 
-test('syncs broadcast stateless message between servers and clients', async t => {
-  const redisPrefix = uuidv4()
+const kafkaBrokers = (process.env.KAFKA_BROKERS || '127.0.0.1:9092').split(',')
 
+const kafkaSettings = { kafka: { brokers: kafkaBrokers } }
+
+test.before(() => { ensureKafkaMock() })
+test.afterEach.always(() => { resetKafkaMock() })
+
+test('syncs broadcast stateless message via Kafka between servers and clients', async t => {
   await new Promise(async resolve => {
     const payloadToSend = 'STATELESS-MESSAGE'
+    const sharedPrefix = `kafka-${uuidv4()}`
+
     const server = await newHocuspocus({
       extensions: [
-        new Redis({
-          ...redisConnectionSettings,
+        new Kafka({
+          ...kafkaSettings,
           identifier: `server${uuidv4()}`,
-          prefix: redisPrefix,
+          prefix: sharedPrefix,
         }),
       ],
     })
 
     const anotherServer = await newHocuspocus({
       extensions: [
-        new Redis({
-          ...redisConnectionSettings,
+        new Kafka({
+          ...kafkaSettings,
           identifier: `anotherServer${uuidv4()}`,
-          prefix: redisPrefix,
+          prefix: sharedPrefix,
         }),
       ],
     })
 
-    // Once we’re setup make an edit on anotherProvider. To get to the provider it will need
-    // to pass through Redis:
-    // provider -> server -> Redis -> anotherServer -> anotherProvider
-
-    // Wait for a stateless message to confirm whether another provider has the same payload.
     newHocuspocusProvider(anotherServer, {
       onStateless: ({ payload }) => {
         t.is(payload, payloadToSend)
@@ -41,29 +44,25 @@ test('syncs broadcast stateless message between servers and clients', async t =>
       },
     })
 
-    // Once the initial data is synced on the sender, wait a tick to ensure
-    // the receiver has completed subscription, then send a stateless message
     newHocuspocusProvider(server, {
       onSynced() {
-        setTimeout(() => {
-          server.documents.get('hocuspocus-test')?.broadcastStateless(payloadToSend)
-        }, 100)
+        server.documents.get('hocuspocus-test')?.broadcastStateless(payloadToSend)
       },
     })
   })
 })
 
-test('client stateless messages shouldnt propagate to other server', async t => {
-  const redisPrefix = uuidv4()
-
+test('client stateless messages via Kafka shouldnt propagate to other server', async t => {
+  const sharedPrefix = `kafka-${uuidv4()}`
   await new Promise(async resolve => {
     const payloadToSend = 'STATELESS-MESSAGE'
+
     const server = await newHocuspocus({
       extensions: [
-        new Redis({
-          ...redisConnectionSettings,
+        new Kafka({
+          ...kafkaSettings,
           identifier: `server${uuidv4()}`,
-          prefix: redisPrefix,
+          prefix: sharedPrefix,
         }),
       ],
       async onStateless({ payload }) {
@@ -73,16 +72,15 @@ test('client stateless messages shouldnt propagate to other server', async t => 
       },
     })
 
-    const anotherServer = await newHocuspocus({
+    await newHocuspocus({
       extensions: [
-        new Redis({
-          ...redisConnectionSettings,
+        new Kafka({
+          ...kafkaSettings,
           identifier: `anotherServer${uuidv4()}`,
-          prefix: redisPrefix,
+          prefix: sharedPrefix,
         }),
       ],
       async onStateless() {
-        console.log('failed')
         t.fail()
       },
     })
@@ -95,29 +93,29 @@ test('client stateless messages shouldnt propagate to other server', async t => 
   })
 })
 
-test('server client stateless messages shouldnt propagate to other client', async t => {
+test('server client stateless messages via Kafka shouldnt propagate to other client', async t => {
   await new Promise(async resolve => {
-    const redisPrefix = uuidv4()
+    const sharedPrefix = `kafka-${uuidv4()}`
 
     const server = await newHocuspocus({
       extensions: [
-        new Redis({
-          ...redisConnectionSettings,
+        new Kafka({
+          ...kafkaSettings,
           identifier: `server${uuidv4()}`,
-          prefix: redisPrefix,
+          prefix: sharedPrefix,
         }),
       ],
-      async onStateless({ connection, document }) {
+      async onStateless({ connection }) {
         connection.sendStateless('test123')
       },
     })
 
     const anotherServer = await newHocuspocus({
       extensions: [
-        new Redis({
-          ...redisConnectionSettings,
+        new Kafka({
+          ...kafkaSettings,
           identifier: `anotherServer${uuidv4()}`,
-          prefix: redisPrefix,
+          prefix: sharedPrefix,
         }),
       ],
       async onStateless() {
@@ -125,7 +123,7 @@ test('server client stateless messages shouldnt propagate to other client', asyn
       },
     })
 
-    const provider2 = newHocuspocusProvider(anotherServer, {
+    newHocuspocusProvider(anotherServer, {
       onStateless() {
         t.fail()
       },
@@ -143,6 +141,5 @@ test('server client stateless messages shouldnt propagate to other client', asyn
     setTimeout(() => {
       resolve('done')
     }, 500)
-
   })
 })

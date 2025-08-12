@@ -86,3 +86,32 @@ const anotherServer = new Server({
 
 anotherServer.listen();
 ```
+
+## CLI usage
+
+You can run a Redis-enabled server using the `@hocuspocus/cli` as well.
+
+```bash
+npx @hocuspocus/cli \
+  --redis \
+  --redis-host 127.0.0.1 \
+  --redis-port 6379 \
+  --sqlite # optional persistence
+```
+
+Flags:
+
+- `--redis`: Enable the Redis extension
+- `--redis-host`: Redis host, default `127.0.0.1`; can also set `REDIS_HOST`
+- `--redis-port`: Redis port, default `6379`; can also set `REDIS_PORT`
+- `--redis-prefix`: Key prefix, default `hocuspocus`
+- `--redis-id`: Unique instance identifier, default random UUID
+- `--redis-disconnect-delay`: Delay in ms before unloading documents after store/disconnect, default `1000`
+- `--redis-lock-timeout`: TTL in ms for distributed lock, default `1000`
+
+Examples:
+
+```bash
+hocuspocus --redis --redis-host 127.0.0.1 --redis-port 6379
+hocuspocus --redis --redis-prefix myapp
+```

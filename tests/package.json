@@ -5,6 +5,7 @@
   "type": "module",
   "dependencies": {
     "@hocuspocus/extension-logger": "^3.2.3",
+    "@hocuspocus/extension-kafka": "^3.2.3",
     "@hocuspocus/extension-redis": "^3.2.3",
     "@hocuspocus/extension-throttle": "^3.2.3",
     "@hocuspocus/provider": "^3.2.3",

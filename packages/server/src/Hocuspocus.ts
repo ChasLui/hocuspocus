@@ -265,13 +265,14 @@ export class Hocuspocus {
 		// If the update was received through other ways than the
 		// WebSocket connection, we don’t need to feel responsible for
 		// storing the content.
-		// also ignore changes incoming through redis connection, as this would be a breaking change (#730, #696, #606)
-		if (
-			!connection ||
-			(connection as unknown as string) === "__hocuspocus__redis__origin__"
-		) {
-			return;
-		}
+			// also ignore changes incoming through redis/kafka connections, as this would be a breaking change (#730, #696, #606)
+			if (
+				!connection ||
+				(connection as unknown as string) === "__hocuspocus__redis__origin__" ||
+				(connection as unknown as string) === "__hocuspocus__kafka__origin__"
+			) {
+				return;
+			}
 
 		await this.storeDocumentHooks(document, hookPayload);
 	}

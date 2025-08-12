@@ -1,0 +1,39 @@
+{
+  "name": "@hocuspocus/extension-kafka",
+  "version": "3.2.3",
+  "description": "Scale Hocuspocus horizontally with Kafka",
+  "homepage": "https://hocuspocus.dev",
+  "keywords": [
+    "hocuspocus",
+    "kafka",
+    "yjs"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/hocuspocus-kafka.cjs",
+  "module": "dist/hocuspocus-kafka.esm.js",
+  "types": "dist/packages/extension-kafka/src/index.d.ts",
+  "exports": {
+    "source": {
+      "import": "./src/index.ts"
+    },
+    "default": {
+      "import": "./dist/hocuspocus-kafka.esm.js",
+      "require": "./dist/hocuspocus-kafka.cjs",
+      "types": "./dist/packages/extension-kafka/src/index.d.ts"
+    }
+  },
+  "files": ["src", "dist"],
+  "devDependencies": {
+    "@types/uuid": "^10.0.0"
+  },
+  "dependencies": {
+    "@hocuspocus/server": "^3.2.3",
+    "kafkajs": "^2.2.4",
+    "uuid": "^11.0.3"
+  },
+  "peerDependencies": {
+    "y-protocols": "^1.0.6",
+    "yjs": "^13.6.8"
+  }
+}
